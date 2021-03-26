@@ -1,3 +1,8 @@
+<?php
+if ($_POST['name'] === '') {
+	$error['name'] = 'blank';
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -17,10 +22,15 @@
 <div id="content">
 <p>次のフォームに必要事項をご記入ください。</p>
 <form action="" method="post" enctype="multipart/form-data">
+<!-- form action="":空の場合には自分自身のファイルにジャンプさせる→正しい場合check.phpにジャンプさせる-->
 	<dl>
 		<dt>ニックネーム<span class="required">必須</span></dt>
 		<dd>
         	<input type="text" name="name" size="35" maxlength="255" value="" />
+					<?php if ($error['name'] === 'blank'): ?>
+					<!-- phpはif,while,for,foreach,switchの各構造において開き波括弧をコロン:、閉じ波括弧をそれぞれendif,end~に変更することで,phpとhtmlを混在して記入する時視認性を向上させる -->
+					<p class ="error">* ニックネームを入力してください</p>
+					<?php endif; ?>
 		</dd>
 		<dt>メールアドレス<span class="required">必須</span></dt>
 		<dd>
