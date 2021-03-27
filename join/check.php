@@ -1,3 +1,11 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['join'])) {//index.phpにて正しくフォーム内容が記載されていなかった場合
+	header('Location: index.php');
+	exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -21,8 +29,10 @@
 	<dl>
 		<dt>ニックネーム</dt>
 		<dd>
+		<?php print(htmlspecialchars($_SESSION['join']['name'], ENT_QUOTES)); ?>
         </dd>
 		<dt>メールアドレス</dt>
+		<?php print(htmlspecialchars($_SESSION['join']['email'], ENT_QUOTES)); ?>
 		<dd>
         </dd>
 		<dt>パスワード</dt>

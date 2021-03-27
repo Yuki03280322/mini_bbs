@@ -1,4 +1,6 @@
 <?php
+session_start();//個人情報を含むためcookieは危険
+
 if (!empty($_POST)) {
 	if ($_POST['name'] === '') {
 		$error['name'] = 'blank';
@@ -15,6 +17,7 @@ if (!empty($_POST)) {
 	}
 	
 	if (empty($error)) {
+		$_SESSION['join'] = $_POST;//joinというキーに対してPOSTの内容を保存
 		header('Location: check.php');
 	// エラーが発生していなければ($errorの配列に設定されているかどうか)check.phpという画面にジャンプする
 		exit();
@@ -23,6 +26,9 @@ if (!empty($_POST)) {
 	// これらのチェックはフォームが送信されたときに処理を走らせる必要がある	
 }
 
+if ($_REQUEST['action'] == 'rewrite' && isset($_SESSION['join'])) {//urlパラメーターにrewriteがついていれば
+	$_POST = $_SESSION['join'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
