@@ -15,9 +15,21 @@ if (!empty($_POST)) {
 	if ($_POST['password'] === '') {
 		$error['password'] = 'blank';
 	}
+	$fileName = $_FILES['image']['name'];//imageというname属性がついたファイルアップロードからアップロードされたファイルのファイル名を変数へ
+	if (!empty($fileName)) {
+		$ext = substr($fileName, -3);//ファイルの後ろ3文字を切り取る(ファイルの拡張子を見る)
+		if ($ext != 'jpg' && $ext != 'gif' && $ext != 'png') {
+			$error['image'] = 'type';
+		}
+	}
 	
 	if (empty($error)) {
+		$image = date('YmdHis') . $_FILES['image']['name'];//['image']['name']:アップロードするファイル名を作るex:20210328mybirthday.png
+		move_uploaded_file($_FILES['image']['tmp_name'],'../member_picture/' . $image);//tmp_name:一時的にアップロードされている場所であり、このあと消えてしまうため削除されない専用のディレクトリに保存する為move_uploaded_file関数を使用
+		//$_FILES['image]['tmp_name]:移動前のパス指定
+		//../member_picture/ . $image:移動先のパス指定,member_pictureというディレクトリにさっき作成した変数で保存
 		$_SESSION['join'] = $_POST;//joinというキーに対してPOSTの内容を保存
+		$_SESSION['join']['image'] = $image;
 		header('Location: check.php');
 	// エラーが発生していなければ($errorの配列に設定されているかどうか)check.phpという画面にジャンプする
 		exit();
@@ -49,7 +61,10 @@ if ($_REQUEST['action'] == 'rewrite' && isset($_SESSION['join'])) {//urlパラ�
 <div id="content">
 <p>次のフォームに必要事項をご記入ください。</p>
 <form action="" method="post" enctype="multipart/form-data">
-<!-- form action="":空の場合には自分自身のファイルにジャンプさせる→正しい場合check.phpにジャンプさせる-->
+<!-- 
+form action="":空の場合には自分自身のファイルにジャンプさせる→正しい場合check.phpにジャンプさせる
+enctype="multipart/form-data":フォームにファイルをアップロードするための決り文句でtype="file"で活用
+-->
 	<dl>
 		<dt>ニックネーム<span class="required">必須</span></dt>
 		<dd>
@@ -81,6 +96,12 @@ if ($_REQUEST['action'] == 'rewrite' && isset($_SESSION['join'])) {//urlパラ�
 		<dt>写真など</dt>
 		<dd>
         	<input type="file" name="image" size="35" value="test"  />
+					<?php if ($error['image'] === 'type'): ?>
+					<p class = "error">* 写真は'jpg','png','gif'のみアップロード可能です</p>
+					<?php endif; ?>
+					<?php if (!empty($error)): ?>
+					<p class="error">* 恐れ入りますが、画像を改めて指定してください</p>
+					<?php endif; ?>
         </dd>
 	</dl>
 	<div><input type="submit" value="入力内容を確認する" /></div>
