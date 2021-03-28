@@ -1,8 +1,23 @@
 <?php
 session_start();
+require('../dbconnect.php');
 
 if (!isset($_SESSION['join'])) {//index.phpにて正しくフォーム内容が記載されていなかった場合
 	header('Location: index.php');
+	exit();
+}
+
+if (!empty($_POST)) {
+	$statement = $db->prepare('INSERT INTO members SET name=?, email=?, password=?, picture=?, created=NOW()');
+	$statement->execute(array(
+		$_SESSION['join']['name'],
+		$_SESSION['join']['email'],
+		sha1($_SESSION['join']['password']),
+		$_SESSION['join']['image']
+	));
+	unset($_SESSION['join']);//不要なセッション変数を削除(DBに保存したため)
+
+	header('Location: thanks.php');
 	exit();
 }
 ?>
@@ -26,6 +41,9 @@ if (!isset($_SESSION['join'])) {//index.phpにて正しくフォーム内容が�
 <p>記入した内容を確認して、「登録する」ボタンをクリックしてください</p>
 <form action="" method="post">
 	<input type="hidden" name="action" value="submit" />
+	<!--
+	確認画面で送信ボタンを押したことを判断するためにhidden属性のコントローラーを用意しvalue="submit"とすることでフォームの隠し要素として送信している
+	 -->
 	<dl>
 		<dt>ニックネーム</dt>
 		<dd>
