@@ -6,7 +6,7 @@ if ($_COOKIE['email'] !== '') {//自動ログインするため、cookieにemail
   $email = $_COOKIE['email'];
 }
 
-if (!empty($_POST)) {
+if (!empty($_POST)) {//メールアドレスを変更したときに上書きするための記述
   $email = $_POST['email'];
 }
 

@@ -1,3 +1,18 @@
+<?php
+session_start();
+require('dbconnect.php');
+
+if (isset($_SESSION['id']) && $_SESSION['time'] + 3600 > time()) {
+  //sessionに保存されたidとtimeを用いてログインしているかを判断し、ログイン後1時間内にアクションがあったかどうか
+  $_SESSION['time'] = time();
+  $members = $db->prepare('SELECT * FROM members WHERE id=?');
+  $members->execute(array($_SESSION['id']));//sessionidを元に会員情報を引っ張り出す
+  $member = $members->fetch();
+} else {//sessionにidが保存されていない場合、もしくはログイン後1時間以上何も動きがなかった場合
+  header('Location: login.php');
+  exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -18,7 +33,7 @@
   	<div style="text-align: right"><a href="logout.php">ログアウト</a></div>
     <form action="" method="post">
       <dl>
-        <dt>○○さん、メッセージをどうぞ</dt>
+        <dt><?php print(htmlspecialchars($member['name'], ENT_QUOTES)); ?>さん、メッセージをどうぞ</dt>
         <dd>
           <textarea name="message" cols="50" rows="5"></textarea>
           <input type="hidden" name="reply_post_id" value="" />
