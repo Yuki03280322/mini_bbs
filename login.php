@@ -1,5 +1,14 @@
 <?php
+session_start();
 require('dbconnect.php');
+
+if ($_COOKIE['email'] !== '') {//自動ログインするため、cookieにemailを保存するための記述
+  $email = $_COOKIE['email'];
+}
+
+if (!empty($_POST)) {
+  $email = $_POST['email'];
+}
 
 if (!empty($_POST)) {
   if ($_POST['email'] == '') {
@@ -20,6 +29,11 @@ if (!empty($_POST)) {
       $_SESSION['id'] = $member['id'];
       $_SESSION['time'] = time();
       //passwordや個人情報はセッションへ保存するのは危険のため控える
+
+      if ($_POST['save'] === 'on') {//次回から自動的にログインするための記述
+        setcookie('email', $_POST['email'],time()+60*60*24*14);
+      }
+
       header('Location: index.php');
       exit();
       //form action=""としているため正しく動作をしている時次のページへジャンプさせる処理を書く
@@ -52,7 +66,7 @@ if (!empty($_POST)) {
       <dl>
         <dt>メールアドレス</dt>
         <dd>
-          <input type="text" name="email" size="35" maxlength="255" value="<?php print(htmlspecialchars($_POST['email'], ENT_QUOTES)); ?>" />
+          <input type="text" name="email" size="35" maxlength="255" value="<?php print(htmlspecialchars($email, ENT_QUOTES)); ?>" />
           <?php if ($error['email'] === 'blank'): ?>
           <p class="error">* メールアドレスを入力してください</p>
           <?php endif; ?>
