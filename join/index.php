@@ -1,5 +1,6 @@
 <?php
 session_start();//個人情報を含むためcookieは危険
+require('../dbconnect.php');
 
 if (!empty($_POST)) {
 	if ($_POST['name'] === '') {
@@ -22,6 +23,17 @@ if (!empty($_POST)) {
 			$error['image'] = 'type';
 		}
 	}
+
+	if (empty($error)){
+		$member = $db->prepare('SELECT COUNT(*) AS cnt FROM members WHERE email=?');
+		//SELECT COUNT(*):件数を数字で取得し、emailを?で絞り込む
+		$member->execute(array($_POST['email']));//絞り込むemailを取得
+		$record = $member->fetch();//取得結果をfetchで取り出す(検索したemailアドレスがあれば1,なければ0を返す)
+		if ($record['cnt'] > 0) {
+			$error['email'] = 'duplicate';
+		}
+	}
+	//emailの重複チェック
 	
 	if (empty($error)) {
 		$image = date('YmdHis') . $_FILES['image']['name'];//['image']['name']:アップロードするファイル名を作るex:20210328mybirthday.png
@@ -82,6 +94,9 @@ enctype="multipart/form-data":フォームにファイルをアップロード�
         	<input type="text" name="email" size="35" maxlength="255" value="<?php print(htmlspecialchars($_POST['email'],ENT_QUOTES)); ?>" />
 					<?php if ($error['email'] === 'blank'): ?>
 					<p class ="error">* メールアドレスを入力してください</p>
+					<?php endif; ?>
+					<?php if ($error['email'] === 'duplicate'): ?>
+					<p class ="error">* 指定されたメールアドレスは既に使用されています</p>
 					<?php endif; ?>
 		<dt>パスワード<span class="required">必須</span></dt>
 		<dd>
