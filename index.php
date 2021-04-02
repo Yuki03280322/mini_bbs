@@ -85,8 +85,10 @@ if (isset($_REQUEST['res'])) {//返信用の[Re]がクリックされた場合
     <a href="view.php?id=<?php print(htmlspecialchars($post['reply_message_id'], ENT_QUOTES)); ?>">
     返信元のメッセージ</a>
   <?php endif; ?>
-    [<a href="delete.php?id="
+  <?php if ($post['member_id'] == $_SESSION['id']): ?>
+    [<a href="delete.php?id=<?php print(htmlspecialchars($post['id'])); ?>"
     style="color: #F33;">削除</a>]
+  <?php endif; ?>
     </p>
     </div>
 <?php endforeach; ?>
