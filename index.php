@@ -27,10 +27,28 @@ if (!empty($_POST)) {//メッセージをDBへ保存するための処理
   }
 }
 
-$posts = $db->query('SELECT m.name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id ORDER BY p.created DESC');
+$page = $_REQUEST['page'];
+if (page == '') {
+  $page = 1;
+}
+$page = max($page, 1);//urlパラメーターに1以下が指定されないようにする
+
+$counts = $db->query('SELECT COUNT(*) AS cnt FROM posts');//最小のページ数を出すために投稿数を取得する準備
+$cnt = $counts->fetch();
+$maxPage = ceil($cnt['cnt'] / 5);//取得した件数を5でわり、小数点を切り上げる
+$page = min($page, $maxPage);//urlパラメーターに最小ページ数以上が指定されないようにする
+
+$start = ($page-1) * 5;
+
+$posts = $db->prepare('SELECT m.name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id ORDER BY p.created DESC LIMIT ?,5');
+$posts->bindParam(1, $start, PDO::PARAM_INT);
+$posts->execute();
 //DBから取得するだけなのでqueryメソッドを使う
 //m. p. はテーブル名のショートカット(エイリアス)
 //m.id=p.member_id:リレーションをはるためのキーの一致
+//ページネーションを組むためには?に5の倍数を入れて1ページに5件ずつ表示する
+//executeメソッドを使用すると数字を文字列として扱うためこの場合は適していないのでbindParamを使う
+//bindParam:引数には$パラメータid,$バインドする変数,バインドするデータ型を指定
 
 if (isset($_REQUEST['res'])) {//返信用の[Re]がクリックされた場合
   //返信の処理
@@ -94,8 +112,12 @@ if (isset($_REQUEST['res'])) {//返信用の[Re]がクリックされた場合
 <?php endforeach; ?>
 
 <ul class="paging">
-<li><a href="index.php?page=">前のページへ</a></li>
-<li><a href="index.php?page=">次のページへ</a></li>
+<?php if ($page > 1): ?>
+<li><a href="index.php?page=<?php print(htmlspecialchars($page-1)) ?>">前のページへ</a></li>
+<?php endif; ?>
+<?php if ($page < $maxPage): ?>
+<li><a href="index.php?page=<?php print(htmlspecialchars($page+1)) ?>">次のページへ</a></li>
+<?php endif; ?>
 </ul>
   </div>
 </div>
